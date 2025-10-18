@@ -93,7 +93,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE O
 
 ## 3) Backend: Firebase Auth Verification
 
-* [ ] **3.1 In Firebase console**: create project, enable **Email/Password** auth; create web app; copy web config.
+* [x] **3.1 In Firebase console**: create project, enable **Email/Password** auth; create web app; copy web config.
 * [ ] **3.2 Save web config** to `/frontend/.env.local` placeholders (will fill later).
 * [ ] **3.3 Backend install**: `pip install google-auth google-auth-oauthlib google-auth-httplib2`.
 * [ ] **3.4 Create `app/auth/firebase.py`**: utility to verify Firebase ID token using Google certs (`google.oauth2.id_token.verify_firebase_token`).

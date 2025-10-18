@@ -186,3 +186,61 @@ class ErrorResponse(BaseModel):
     detail: str
     code: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+
+# =============================================================================
+# YELP API SCHEMAS (Complete the existing section)
+# =============================================================================
+
+class RestaurantSummary(BaseModel):
+    """Clean, simplified restaurant data for search results."""
+    id: str = Field(description="Yelp business ID")
+    name: str = Field(description="Restaurant name")
+    rating: float = Field(ge=1.0, le=5.0, description="Star rating (1-5)")
+    price: Optional[str] = Field(None, description="Price range ($, $$, $$$, $$$$)")
+    categories: List[str] = Field(default_factory=list, description="Cuisine categories")
+    image_url: Optional[str] = Field(None, description="Restaurant photo URL")
+    distance: Optional[float] = Field(None, description="Distance in meters")
+    is_open: bool = Field(description="Whether restaurant is currently open")
+    review_count: int = Field(ge=0, description="Number of reviews")
+    address: Optional[str] = Field(None, description="Full address string")
+    phone: Optional[str] = Field(None, description="Phone number")
+    yelp_url: Optional[str] = Field(None, description="Link to Yelp page")
+
+class RestaurantDetail(BaseModel):
+    """Detailed restaurant information for individual pages."""
+    id: str = Field(description="Yelp business ID")
+    name: str = Field(description="Restaurant name")
+    rating: float = Field(ge=1.0, le=5.0, description="Star rating (1-5)")
+    price: Optional[str] = Field(None, description="Price range ($, $$, $$$, $$$$)")
+    categories: List[str] = Field(default_factory=list, description="Cuisine categories")
+    image_url: Optional[str] = Field(None, description="Restaurant photo URL")
+    photos: List[str] = Field(default_factory=list, description="Additional photo URLs")
+    is_open: bool = Field(description="Whether restaurant is currently open")
+    review_count: int = Field(ge=0, description="Number of reviews")
+    address: Optional[str] = Field(None, description="Full address string")
+    phone: Optional[str] = Field(None, description="Phone number")
+    yelp_url: Optional[str] = Field(None, description="Link to Yelp page")
+    coordinates: Optional[dict] = Field(None, description="Latitude and longitude")
+    hours: Optional[dict] = Field(None, description="Business hours information")
+    transactions: List[str] = Field(default_factory=list, description="Available services (delivery, pickup, etc.)")
+
+class YelpReview(BaseModel):
+    """Individual review from Yelp."""
+    id: str = Field(description="Review ID")
+    rating: int = Field(ge=1, le=5, description="Star rating (1-5)")
+    text: str = Field(description="Review text")
+    time_created: str = Field(description="When review was created")
+    user: dict = Field(description="Reviewer information")
+    url: Optional[str] = Field(None, description="Link to full review")
+
+class YelpSearchResponse(BaseModel):
+    """Response from Yelp search API."""
+    businesses: List[RestaurantSummary] = Field(default_factory=list)
+    total: int = Field(ge=0, description="Total number of results")
+    region: Optional[dict] = Field(None, description="Search region information")
+
+class YelpBusinessResponse(BaseModel):
+    """Response from Yelp business details API."""
+    business: RestaurantDetail
+    reviews: List[YelpReview] = Field(default_factory=list)

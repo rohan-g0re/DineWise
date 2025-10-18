@@ -128,23 +128,23 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE O
 
 ## 6) Backend: Search & Details Routers (extra‑granular)
 
-* [ ] **6.1 Create `app/routers/search.py`** and mount under `/api` in `main.py`.
+* [x] **6.1 Create `app/routers/search.py`** and mount under `/api` in `main.py`.
 
-* [ ] **6.2 Define query parser**: accept `q, location, cuisine, price (comma list), rating_min, limit, offset`.
+* [x] **6.2 Define query parser**: accept `q, location, cuisine, price (comma list), rating_min, limit, offset`.
 
-* [ ] **6.3 Normalizers**: trim strings; clamp `limit` (e.g., 50 max); default `offset=0`.
+* [x] **6.3 Normalizers**: trim strings; clamp `limit` (e.g., 50 max); default `offset=0`.
 
-* [ ] **6.4 DB path helper**: function `query_db_search(params)` that builds SQLModel query with filters.
+* [x] **6.4 DB path helper**: function `query_db_search(params)` that builds SQLModel query with filters.
 
-* [ ] **6.5 Yelp path helper**: function `call_yelp_search(params)` that maps params → Yelp API and returns normalized items.
+* [x] **6.5 Yelp path helper**: function `call_yelp_search(params)` that maps params → Yelp API and returns normalized items.
 
-* [ ] **6.6 Location switch**: if `location in {MAN,BK,QN,BX,SI}` use DB path else Yelp path.
+* [x] **6.6 Location switch**: if `location in {MAN,BK,QN,BX,SI}` use DB path else Yelp path.
 
-* [ ] **6.7 Response mapper**: convert both paths to a unified `RestaurantSummary` list.
+* [x] **6.7 Response mapper**: convert both paths to a unified `RestaurantSummary` list.
 
-* [ ] **6.8 Error handling**: catch Yelp 429/400 → return `detail, code` for FE banner.
+* [x] **6.8 Error handling**: catch Yelp 429/400 → return `detail, code` for FE banner.
 
-* [ ] **6.9 Unit tests**: mock DB & mock Yelp; verify param parsing and mapping.
+* [x] **6.9 Unit tests**: mock DB & mock Yelp; verify param parsing and mapping.
 
 * [ ] **6.10 Create `app/routers/restaurants.py`** with `GET /restaurants/{yelp_id}`.
 

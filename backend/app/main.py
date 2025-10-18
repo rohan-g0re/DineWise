@@ -2,7 +2,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.routers import health, auth  # Add auth import
+from app.routers import health, auth # Add auth import
+from app.routers import search
+
 
 # Create FastAPI application
 app = FastAPI(
@@ -24,6 +26,11 @@ app.add_middleware(
 # Include routers
 app.include_router(health.router)
 app.include_router(auth.router)  # Add auth router
+app.include_router(search.router, prefix="/search", tags=["search"])
+
+
+
+
 
 # Root endpoint
 @app.get("/")
@@ -61,3 +68,4 @@ async def test_yelp_clean():
         }
     except YelpAPIError as e:
         return {"status": "error", "message": str(e)}               
+

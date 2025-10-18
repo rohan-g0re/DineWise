@@ -108,6 +108,9 @@ class BoroughSeeder:
         Returns:
             RestaurantCache database model ready for insertion
         """
+        # Convert all categories to lowercase for case-insensitive search
+        lowercase_categories = [cat.lower() for cat in restaurant.categories] if restaurant.categories else []
+        
         return RestaurantCache(
             yelp_id=restaurant.id,
             name=restaurant.name,
@@ -117,7 +120,7 @@ class BoroughSeeder:
             price=restaurant.price,
             rating=restaurant.rating,
             review_count=restaurant.review_count,
-            categories=restaurant.categories,
+            categories=lowercase_categories,
             phone=restaurant.phone,
             address=restaurant.address,
             provider="yelp",
@@ -143,10 +146,13 @@ class BoroughSeeder:
             
             if existing:
                 # Update existing record
+                # Convert categories to lowercase for consistency
+                lowercase_categories = [cat.lower() for cat in restaurant.categories] if restaurant.categories else []
+                
                 existing.name = restaurant.name
                 existing.rating = restaurant.rating
                 existing.review_count = restaurant.review_count
-                existing.categories = restaurant.categories
+                existing.categories = lowercase_categories
                 existing.phone = restaurant.phone
                 existing.address = restaurant.address
                 existing.last_fetched_at = datetime.utcnow()

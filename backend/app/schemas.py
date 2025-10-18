@@ -206,6 +206,7 @@ class RestaurantSummary(BaseModel):
     address: Optional[str] = Field(None, description="Full address string")
     phone: Optional[str] = Field(None, description="Phone number")
     yelp_url: Optional[str] = Field(None, description="Link to Yelp page")
+    coordinates: Optional[dict] = Field(None, description="Latitude and longitude")  # ← ADD THIS LINE
 
 class RestaurantDetail(BaseModel):
     """Detailed restaurant information for individual pages."""
@@ -224,6 +225,7 @@ class RestaurantDetail(BaseModel):
     coordinates: Optional[dict] = Field(None, description="Latitude and longitude")
     hours: Optional[dict] = Field(None, description="Business hours information")
     transactions: List[str] = Field(default_factory=list, description="Available services (delivery, pickup, etc.)")
+    
 
 class YelpReview(BaseModel):
     """Individual review from Yelp."""

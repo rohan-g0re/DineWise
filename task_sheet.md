@@ -105,24 +105,24 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE O
 
 ## 4) Backend: Yelp Fusion Client
 
-* [ ] **4.1 Install**: `pip install httpx`.
-* [ ] **4.2 Create `app/clients/yelp.py`** with async httpx client, base headers (Authorization: `Bearer <YELP_API_KEY>` from settings).
-* [ ] **4.3 Implement `search_businesses(term, location, price, rating, limit, offset)`**; map safe params only.
-* [ ] **4.4 Implement `search_nearby(lat, lng, radius, categories, price, limit)`**.
-* [ ] **4.5 Implement `get_business(id)`** and `get_reviews(id)` (up to the API’s limits).
-* [ ] **4.6 Add thin DTO mappers** to `schemas.py`: `RestaurantSummary`, `RestaurantDetail`, `YelpReview`.
-* [ ] **4.7 Handle 429/400**: raise typed exceptions with helpful messages.
+* [x] **4.1 Install**: `pip install httpx`.
+* [x] **4.2 Create `app/clients/yelp.py`** with async httpx client, base headers (Authorization: `Bearer <YELP_API_KEY>` from settings).
+* [x] **4.3 Implement `search_businesses(term, location, price, rating, limit, offset)`**; map safe params only.
+* [x] **4.4 Implement `search_nearby(lat, lng, radius, categories, price, limit)`**.
+* [x] **4.5 Implement `get_business(id)`** and `get_reviews(id)` (up to the API’s limits).
+* [x] **4.6 Add thin DTO mappers** to `schemas.py`: `RestaurantSummary`, `RestaurantDetail`, `YelpReview`.
+* [x] **4.7 Handle 429/400**: raise typed exceptions with helpful messages.
 
 ---
 
 ## 5) Backend: Seed Jobs for Boroughs (limit API calls)
 
-* [ ] **5.1 Create `app/seed/boroughs.py`**: hardcode 5 borough names → Yelp location string.
-* [ ] **5.2 Implement `fetch_top_for_location(location_code, n=100)`** using `search_businesses()`; pick `term="restaurants"`.
-* [ ] **5.3 Map fields into `RestaurantCache`** and upsert by `yelp_id`.
-* [ ] **5.4 Add CLI script** `python -m app.seed.boroughs --limit 100` to seed all 5 boroughs.
-* [ ] **5.5 Add `last_fetched_at` timestamp update on upsert.**
-* [ ] **5.6 Create `/docs/seeding.md`**: steps to run seeding and what fields we store (minimal, link to Yelp page in UI).
+* [x] **5.1 Create `app/seed/boroughs.py`**: hardcode 5 borough names → Yelp location string.
+* [x] **5.2 Implement `fetch_top_for_location(location_code, n=100)`** using `search_businesses()`; pick `term="restaurants"`.
+* [x] **5.3 Map fields into `RestaurantCache`** and upsert by `yelp_id`.
+* [x] **5.4 Add CLI script** `python -m app.seed.boroughs --limit 100` to seed all 5 boroughs.
+* [x] **5.5 Add `last_fetched_at` timestamp update on upsert.**
+* [x] **5.6 Create `/docs/seeding.md`**: steps to run seeding and what fields we store (minimal, link to Yelp page in UI).
 
 ---
 

@@ -246,7 +246,8 @@ class YelpClient:
             review_count=yelp_data.get("review_count", 0),
             address=address,
             phone=yelp_data.get("display_phone"),
-            yelp_url=yelp_data.get("url")
+            yelp_url=yelp_data.get("url"),
+            coordinates=yelp_data.get("coordinates")
         )
     
     def _transform_business_to_detail(self, yelp_data: Dict[str, Any]) -> RestaurantDetail:

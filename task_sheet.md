@@ -6,23 +6,23 @@
 
 ## 0) Groundwork & Repo Scaffolding
 
-* [ ] **0.1 Create GitHub repo** `dinewise-mvp` with two folders: `/frontend`, `/backend`.
-* [ ] **0.2 Add root files**: `README.md`, `.gitignore` (Node+Python), `LICENSE` (MIT).
-* [ ] **0.3 Add a one‑page vision** in README (1 paragraph problem, 1 paragraph solution, 6 bullets of features).
-* [ ] **0.4 Add architecture sketch** (ASCII diagram in README for now: Browser → React → FastAPI → Supabase Postgres; Yelp Fusion).
-* [ ] **0.5 Create a task checklist** section in README; link to this doc for detailed tasks.
-* [ ] **0.6 Create `/docs/`** folder; add `data_model.md` (will fill later) and `api_contract.md` (will fill later).
-* [ ] **0.7 Make a `.env.template`** at repo root with placeholders: `YELP_API_KEY`, `FIREBASE_*`, `BACKEND_BASE_URL`, `FRONTEND_BASE_URL`, `JWT_AUDIENCE` (if needed), `GOOGLE_PROJECT_ID`.
-* [ ] **0.8 Decide seed locations**: `MAN`, `BK`, `QN`, `BX`, `SI` (Manhattan, Brooklyn, Queens, Bronx, Staten Island). Add to README.
+* [x] **0.1 Create GitHub repo** `dinewise-mvp` with two folders: `/frontend`, `/backend`.
+* [x] **0.2 Add root files**: `README.md`, `.gitignore` (Node+Python), `LICENSE` (MIT).
+* [x] **0.3 Add a one‑page vision** in README (1 paragraph problem, 1 paragraph solution, 6 bullets of features).
+* [x] **0.4 Add architecture sketch** (ASCII diagram in README for now: Browser → React → FastAPI → Supabase Postgres; Yelp Fusion).
+* [x] **0.5 Create a task checklist** section in README; link to this doc for detailed tasks.
+* [x] **0.6 Create `/docs/`** folder; add `data_model.md` (will fill later) and `api_contract.md` (will fill later).
+* [x] **0.7 Make a `.env.template`** at repo root with placeholders: `YELP_API_KEY`, `FIREBASE_*`, `BACKEND_BASE_URL`, `FRONTEND_BASE_URL`, `JWT_AUDIENCE` (if needed), `GOOGLE_PROJECT_ID`.
+* [x] **0.8 Decide seed locations**: `MAN`, `BK`, `QN`, `BX`, `SI` (Manhattan, Brooklyn, Queens, Bronx, Staten Island). Add to README.
 
 ---
 
 ## 0.9) Supabase Postgres Setup (dev=prod)
 
-* [ ] **0.9.1 Create Supabase project** (closest region).
-* [ ] **0.9.2 Copy pooled SQLAlchemy connection string** from Settings → Database.
-* [ ] **0.9.3 Ensure SSL**: verify `?sslmode=require` in the URL (append if missing).
-* [ ] **0.9.4 (Optional) Create restricted DB role** in SQL Editor:
+* [x] **0.9.1 Create Supabase project** (closest region).
+* [x] **0.9.2 Copy pooled SQLAlchemy connection string** from Settings → Database.
+* [x] **0.9.3 Ensure SSL**: verify `?sslmode=require` in the URL (append if missing).
+* [x] **0.9.4 (Optional) Create restricted DB role** in SQL Editor:
 
 ```
 CREATE ROLE app_user WITH LOGIN PASSWORD 'change_me_strong';
@@ -31,19 +31,19 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_user;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_user;
 ```
 
-* [ ] **0.9.5 Build DATABASE_URL** using `app_user` (or the default user) with `sslmode=require`.
-* [ ] **0.9.6 Create `/backend/.env`** with `DATABASE_URL=...`, `YELP_API_KEY=...`, Firebase values.
-* [ ] **0.9.7 Duplicate to `/backend/.env.example`** with placeholders for teammates.
-* [ ] **0.9.8 Install DB deps**: `pip install sqlmodel sqlalchemy psycopg[binary] alembic`.
-* [ ] **0.9.9 Init Alembic**: `alembic init alembic`; set `sqlalchemy.url = %(DATABASE_URL)s` in `alembic.ini`.
-* [ ] **0.9.10 Add DB ping script** `/backend/scripts/db_ping.py` that opens a session and runs `SELECT 1`.
+* [x] **0.9.5 Build DATABASE_URL** using `app_user` (or the default user) with `sslmode=require`.
+* [x] **0.9.6 Create `/backend/.env`** with `DATABASE_URL=...`, `YELP_API_KEY=...`, Firebase values.
+* [x] **0.9.7 Duplicate to `/backend/.env.example`** with placeholders for teammates.
+* [x] **0.9.8 Install DB deps**: `pip install sqlmodel sqlalchemy psycopg[binary] alembic`.
+* [x] **0.9.9 Init Alembic Created**: `alembic init alembic`; set `sqlalchemy.url = %(DATABASE_URL)s` in `alembic.ini`.
+* [x] **0.9.10 Add DB ping script** `/backend/scripts/db_ping.py` that opens a session and runs `SELECT 1`.
 
 ---
 
 ## 1) Backend: Project Skeleton (FastAPI)
 
-* [ ] **1.1 Create venv** in `/backend` (`python -m venv .venv`), activate, `pip install fastapi uvicorn[standard] python-dotenv pydantic-settings`.
-* [ ] **1.2 Create structure**:
+* [x] **1.1 Create venv** in `/backend` (`python -m venv .venv`), activate, `pip install fastapi uvicorn[standard] python-dotenv pydantic-settings`.
+* [x] **1.2 Create structure**:
 
 ```
 /backend
@@ -56,35 +56,38 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE O
     routers/health.py
 ```
 
-* [ ] **1.3 Implement `core/config.py`**: load env via `pydantic-settings`; expose `settings` (origins, ports, Yelp key, Firebase project id, etc.).
-* [ ] **1.4 Implement `routers/health.py`**: `GET /health` → `{status:"ok"}`.
-* [ ] **1.5 Add CORS middleware** in `main.py`: allow `http://localhost:5173`.
-* [ ] **1.6 Run server**: `uvicorn app.main:app --reload`; hit `/health` in browser.
-* [ ] **1.7 Freeze deps**: create `requirements.txt` (use `pip freeze > requirements.txt`).
+* [x] **1.3 Implement `core/config.py`**: load env via `pydantic-settings`; expose `settings` (origins, ports, Yelp key, Firebase project id, etc.).
+* [x] **1.4 Implement `routers/health.py`**: `GET /health` → `{status:"ok"}`.
+* [x] **1.5 Add CORS middleware** in `main.py`: allow `http://localhost:5173`.
+* [x] **1.6 Run server**: `uvicorn app.main:app --reload`; hit `/health` in browser.
+* [x] **1.7 Freeze deps**: create `requirements.txt` (use `pip freeze > requirements.txt`).
 
 ---
 
 ## 2) Backend: Database (Supabase Postgres) & Models (SQLModel + Alembic)
 
-* [ ] **2.1 Create `app/db.py`**
+* [x] **2.1 Create `app/db.py`**
 
-  * [ ] 2.1.1 Read `DATABASE_URL` from env.
-  * [ ] 2.1.2 `engine = create_engine(DATABASE_URL, pool_pre_ping=True)`.
-  * [ ] 2.1.3 `SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)`.
-  * [ ] 2.1.4 `get_db()` dependency (yield session; close in `finally`).
-* [ ] **2.2 Create `app/models.py`** (with `SQLMODEL_METADATA = SQLModel.metadata`)
+  * [x] 2.1.1 Read `DATABASE_URL` from env.
+  * [x] 2.1.2 `engine = create_engine(DATABASE_URL, pool_pre_ping=True)`.
+  * [x] 2.1.3 `SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)`.
+  * [x] 2.1.4 `get_db()` dependency (yield session; close in `finally`).
 
-  * [ ] 2.2.1 `User(id PK, email UNIQUE, full_name, firebase_uid, created_at TIMESTAMP DEFAULT now())`.
-  * [ ] 2.2.2 `RestaurantCache(id PK, yelp_id UNIQUE, name, location_code, lat, lng, price, rating, review_count, categories JSON, phone, address, provider, last_fetched_at TIMESTAMP)`.
-  * [ ] 2.2.3 `Wishlist(id PK, user_id FK→User.id, yelp_id, UNIQUE(user_id, yelp_id))`.
-  * [ ] 2.2.4 `Review(id PK, user_id FK, yelp_id, rating SMALLINT, text TEXT, created_at TIMESTAMP DEFAULT now())`.
-  * [ ] 2.2.5 `UserRestaurantFlags(id PK, user_id FK, yelp_id, visited BOOL DEFAULT FALSE, promo_opt_in BOOL DEFAULT FALSE, updated_at TIMESTAMP DEFAULT now())`.
-* [ ] **2.3 Create `app/schemas.py`**: request/response Pydantic models mirroring columns (no ORM leakage to FE).
-* [ ] **2.4 Wire Alembic**: in `alembic/env.py` set `target_metadata = SQLMODEL_METADATA`.
-* [ ] **2.5 First migration**: `alembic revision --autogenerate -m "init"` → review script → `alembic upgrade head`.
-* [ ] **2.6 Verify tables** in Supabase Table Editor; check PKs, UNIQUEs, and data types.
-* [ ] **2.7 Helpful indexes**: add on `RestaurantCache(location_code)`, `(rating)`, `(review_count)`.
-* [ ] **2.8 Update `/docs/data_model.md`** with final columns + constraints.
+
+* [x] **2.2 Create `app/models.py`** (with `SQLMODEL_METADATA = SQLModel.metadata`)
+
+  * [x] 2.2.1 `User(id PK, email UNIQUE, full_name, firebase_uid, created_at TIMESTAMP DEFAULT now())`.
+  * [x] 2.2.2 `RestaurantCache(id PK, yelp_id UNIQUE, name, location_code, lat, lng, price, rating, review_count, categories JSON, phone, address, provider, last_fetched_at TIMESTAMP)`.
+  * [x] 2.2.3 `Wishlist(id PK, user_id FK→User.id, yelp_id, UNIQUE(user_id, yelp_id))`.
+  * [x] 2.2.4 `Review(id PK, user_id FK, yelp_id, rating SMALLINT, text TEXT, created_at TIMESTAMP DEFAULT now())`.
+  * [x] 2.2.5 `UserRestaurantFlags(id PK, user_id FK, yelp_id, visited BOOL DEFAULT FALSE, promo_opt_in BOOL DEFAULT FALSE, updated_at TIMESTAMP DEFAULT now())`.
+
+* [x] **2.3 Create `app/schemas.py`**: request/response Pydantic models mirroring columns (no ORM leakage to FE).
+* [x] **2.4 Wire Alembic**: in `alembic/env.py` set `target_metadata = SQLMODEL_METADATA`.
+* [x] **2.5 First migration**: `alembic revision --autogenerate -m "init"` → review script → `alembic upgrade head`.
+* [x] **2.6 Verify tables** in Supabase Table Editor; check PKs, UNIQUEs, and data types.
+* [x] **2.7 Helpful indexes**: add on `RestaurantCache(location_code)`, `(rating)`, `(review_count)`.
+* [x] **2.8 Update `/docs/data_model.md`** with final columns + constraints.
 
 ---
 

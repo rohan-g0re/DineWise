@@ -94,12 +94,12 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE O
 ## 3) Backend: Firebase Auth Verification
 
 * [x] **3.1 In Firebase console**: create project, enable **Email/Password** auth; create web app; copy web config.
-* [ ] **3.2 Save web config** to `/frontend/.env.local` placeholders (will fill later).
-* [ ] **3.3 Backend install**: `pip install google-auth google-auth-oauthlib google-auth-httplib2`.
-* [ ] **3.4 Create `app/auth/firebase.py`**: utility to verify Firebase ID token using Google certs (`google.oauth2.id_token.verify_firebase_token`).
-* [ ] **3.5 Create `app/auth/deps.py`**: FastAPI dependency `get_current_user()` → reads `Authorization: Bearer <id_token>`, verifies, upserts user by `email` if new.
-* [ ] **3.6 Add a protected test route** `GET /auth/me` returning `{email, full_name}` for a verified token.
-* [ ] **3.7 Document header usage** in `/docs/api_contract.md` (Authorization bearer).
+* [x] **3.2 Save web config** to `/frontend/.env.local` placeholders (will fill later).
+* [x] **3.3 Backend install**: `pip install google-auth google-auth-oauthlib google-auth-httplib2`.
+* [x] **3.4 Create `app/auth/firebase.py`**: utility to verify Firebase ID token using Google certs (`google.oauth2.id_token.verify_firebase_token`).
+* [x] **3.5 Create `app/auth/deps.py`**: FastAPI dependency `get_current_user()` → reads `Authorization: Bearer <id_token>`, verifies, upserts user by `email` if new.
+* [x] **3.6 Add a protected test route** `GET /auth/me` returning `{email, full_name}` for a verified token.
+* [x] **3.7 Document header usage** in `/docs/api_contract.md` (Authorization bearer).
 
 ---
 
@@ -186,18 +186,18 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE O
 
 ## 9) Frontend: Vite + TS + Tailwind + Router (extra‑granular)
 
-* [ ] **9.1 Scaffold app**: `npm create vite@latest frontend -- --template react-ts`.
-* [ ] **9.2 Install deps**: `cd frontend && npm i`.
-* [ ] **9.3 Run dev server**: `npm run dev` → open `http://localhost:5173`.
-* [ ] **9.4 Install Tailwind**: `npm i -D tailwindcss postcss autoprefixer`.
-* [ ] **9.5 Init Tailwind**: `npx tailwindcss init -p`.
-* [ ] **9.6 Configure content globs** in `tailwind.config.js`.
-* [ ] **9.7 Add base CSS** imports to `src/index.css`.
-* [ ] **9.8 Install Router**: `npm i react-router-dom`.
-* [ ] **9.9 Create routes**: `/login`, `/`, `/r/:id`, `/locator`, `/me` in `src/main.tsx`.
-* [ ] **9.10 Create `Layout`** component with `<Header>` + `<Outlet>`.
-* [ ] **9.11 Header nav**: links to Home, Locator, Me, Login.
-* [ ] **9.12 Basic container styles**: max‑width, padding, responsive grid utilities.
+* [x] **9.1 Scaffold app**: `npm create vite@latest frontend -- --template react-ts`.
+* [x] **9.2 Install deps**: `cd frontend && npm i`.
+* [x] **9.3 Run dev server**: `npm run dev` → open `http://localhost:5173`.
+* [x] **9.4 Install Tailwind**: `npm i -D tailwindcss postcss autoprefixer`.
+* [x] **9.5 Init Tailwind**: `npx tailwindcss init -p`.
+* [x] **9.6 Configure content globs** in `tailwind.config.js`.
+* [x] **9.7 Add base CSS** imports to `src/index.css`.
+* [x] **9.8 Install Router**: `npm i react-router-dom`.
+* [x] **9.9 Create routes**: `/login`, `/`, `/r/:id`, `/locator`, `/me` in `src/main.tsx`.
+* [x] **9.10 Create `Layout`** component with `<Header>` + `<Outlet>`.
+* [x] **9.11 Header nav**: links to Home, Locator, Me, Login.
+* [x] **9.12 Basic container styles**: max‑width, padding, responsive grid utilities.
 
 ---
 

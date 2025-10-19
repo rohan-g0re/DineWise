@@ -7,6 +7,31 @@ import { useNearbyRestaurants } from '../lib/queries';
 import RestaurantCard from './RestaurantCard';
 import { RestaurantGridSkeleton } from './LoadingSkeleton';
 
+// Add pulse animation CSS
+const pulseKeyframes = `
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(1.5);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2);
+  }
+}
+`;
+
+// Inject the animation
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.textContent = pulseKeyframes;
+  document.head.appendChild(style);
+}
+
 // Fix Leaflet default marker icon issue with webpack
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
@@ -16,6 +41,40 @@ let DefaultIcon = L.icon({
   shadowUrl: iconShadow,
   iconSize: [25, 41],
   iconAnchor: [12, 41],
+});
+
+// Custom icon for user location (blue circular marker)
+const UserLocationIcon = L.divIcon({
+  className: 'user-location-marker',
+  html: `
+    <div style="
+      position: relative;
+      width: 20px;
+      height: 20px;
+    ">
+      <div style="
+        width: 20px;
+        height: 20px;
+        background: #4285F4;
+        border: 3px solid white;
+        border-radius: 50%;
+        box-shadow: 0 0 10px rgba(66, 133, 244, 0.6);
+      "></div>
+      <div style="
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40px;
+        height: 40px;
+        background: rgba(66, 133, 244, 0.2);
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+      "></div>
+    </div>
+  `,
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
 });
 
 L.Marker.prototype.options.icon = DefaultIcon;
@@ -149,10 +208,16 @@ function Locator() {
             
             {/* User Location Marker */}
             {userLocation && (
-              <Marker position={[userLocation.lat, userLocation.lng]}>
+              <Marker 
+                position={[userLocation.lat, userLocation.lng]}
+                icon={UserLocationIcon}
+              >
                 <Popup>
                   <div className="text-center">
-                    <strong>You are here</strong>
+                    <strong>📍 You are here</strong>
+                    <p className="text-xs text-gray-600 mt-1">
+                      {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+                    </p>
                   </div>
                 </Popup>
               </Marker>

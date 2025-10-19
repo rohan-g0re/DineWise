@@ -8,7 +8,9 @@ from app.db import get_db
 from app.models import User, Wishlist, RestaurantCache
 from app.schemas import WishlistCreate, WishlistResponse
 from app.auth.deps import get_current_user
+from app.clients.yelp import yelp_client, YelpAPIError
 from typing import List, Dict, Any
+from datetime import datetime, timezone
 
 router = APIRouter()
 
@@ -22,6 +24,7 @@ async def add_to_wishlist(
     """
     Add a restaurant to user's wishlist.
     Uses upsert pattern - won't fail if already exists.
+    Also caches restaurant details from Yelp for profile display.
     """
     
     # Check if already in wishlist
@@ -42,6 +45,39 @@ async def add_to_wishlist(
                 "created_at": existing.created_at
             }
         }
+    
+    # Try to cache restaurant details if not already cached
+    cached_restaurant = db.exec(
+        select(RestaurantCache).where(RestaurantCache.yelp_id == wishlist_data.yelp_id)
+    ).first()
+    
+    if not cached_restaurant:
+        try:
+            print(f"📥 Fetching restaurant details from Yelp for {wishlist_data.yelp_id}")
+            restaurant_detail = await yelp_client.get_business_clean(wishlist_data.yelp_id)
+            
+            # Cache the restaurant details
+            cached_restaurant = RestaurantCache(
+                yelp_id=restaurant_detail.id,
+                name=restaurant_detail.name,
+                rating=restaurant_detail.rating,
+                price=restaurant_detail.price,
+                categories=restaurant_detail.categories,
+                review_count=restaurant_detail.review_count,
+                address=restaurant_detail.address,
+                phone=restaurant_detail.phone,
+                lat=restaurant_detail.coordinates.get("latitude") if restaurant_detail.coordinates else None,
+                lng=restaurant_detail.coordinates.get("longitude") if restaurant_detail.coordinates else None,
+                location_code="WISHLIST",  # Mark as from wishlist
+                created_at=datetime.now(timezone.utc),
+                updated_at=datetime.now(timezone.utc)
+            )
+            db.add(cached_restaurant)
+            db.commit()
+            print(f"✅ Cached restaurant details for {restaurant_detail.name}")
+        except YelpAPIError as e:
+            print(f"⚠️ Could not fetch restaurant details from Yelp: {e}")
+            # Continue anyway - wishlist still added, just no cached details
     
     # Create new wishlist item
     new_wishlist_item = Wishlist(
@@ -178,6 +214,67 @@ async def check_wishlist_status(
     return {
         "yelp_id": yelp_id,
         "in_wishlist": exists
+    }
+
+
+@router.post("/wishlist/refresh-details")
+async def refresh_wishlist_details(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+) -> Dict[str, Any]:
+    """
+    Backfill restaurant details for wishlist items that don't have cached data.
+    This is useful for fixing existing wishlist items.
+    """
+    # Get all wishlist items for user
+    wishlist_items = db.exec(
+        select(Wishlist).where(Wishlist.user_id == current_user.id)
+    ).all()
+    
+    updated_count = 0
+    failed_count = 0
+    
+    for item in wishlist_items:
+        # Check if already cached
+        cached = db.exec(
+            select(RestaurantCache).where(RestaurantCache.yelp_id == item.yelp_id)
+        ).first()
+        
+        if not cached:
+            try:
+                print(f"📥 Fetching details for {item.yelp_id}")
+                restaurant_detail = await yelp_client.get_business_clean(item.yelp_id)
+                
+                # Cache the restaurant details
+                cached_restaurant = RestaurantCache(
+                    yelp_id=restaurant_detail.id,
+                    name=restaurant_detail.name,
+                    rating=restaurant_detail.rating,
+                    price=restaurant_detail.price,
+                    categories=restaurant_detail.categories,
+                    review_count=restaurant_detail.review_count,
+                    address=restaurant_detail.address,
+                    phone=restaurant_detail.phone,
+                    lat=restaurant_detail.coordinates.get("latitude") if restaurant_detail.coordinates else None,
+                    lng=restaurant_detail.coordinates.get("longitude") if restaurant_detail.coordinates else None,
+                    location_code="WISHLIST",
+                    created_at=datetime.now(timezone.utc),
+                    updated_at=datetime.now(timezone.utc)
+                )
+                db.add(cached_restaurant)
+                db.commit()
+                updated_count += 1
+                print(f"✅ Cached details for {restaurant_detail.name}")
+            except YelpAPIError as e:
+                print(f"⚠️ Failed to fetch {item.yelp_id}: {e}")
+                failed_count += 1
+    
+    return {
+        "status": "success",
+        "message": f"Refreshed {updated_count} restaurant details",
+        "updated": updated_count,
+        "failed": failed_count,
+        "total": len(wishlist_items)
     }
 
 

@@ -99,10 +99,16 @@ function RestaurantDetails() {
       return;
     }
     
+    const errorHandler = {
+      onError: (error: any) => {
+        alert(`Failed to update wishlist: ${error.response?.data?.detail?.message || error.message || 'Unknown error'}`);
+      },
+    };
+    
     if (isInWishlist) {
-      removeFromWishlist.mutate(id!);
+      removeFromWishlist.mutate(id!, errorHandler);
     } else {
-      addToWishlist.mutate(id!);
+      addToWishlist.mutate(id!, errorHandler);
     }
   };
 
@@ -139,10 +145,17 @@ function RestaurantDetails() {
       return;
     }
 
-    updateFlags.mutate({
-      yelpId: id!,
-      [field]: !flags[field],
-    });
+    updateFlags.mutate(
+      {
+        yelpId: id!,
+        [field]: !flags[field],
+      },
+      {
+        onError: (error: any) => {
+          alert(`Failed to update: ${error.response?.data?.detail?.message || error.message || 'Unknown error'}`);
+        },
+      }
+    );
   };
 
   return (

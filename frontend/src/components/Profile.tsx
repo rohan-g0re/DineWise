@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useWishlist, useMyReviews, useRemoveFromWishlist, useDeleteReview } from '../lib/queries';
+import api from '../lib/api';
 import ErrorBanner from './ErrorBanner';
 
 type Tab = 'wishlist' | 'reviews';
@@ -9,8 +10,9 @@ type Tab = 'wishlist' | 'reviews';
 function Profile() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('wishlist');
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const { data: wishlistData, isLoading: wishlistLoading, error: wishlistError } = useWishlist();
+  const { data: wishlistData, isLoading: wishlistLoading, error: wishlistError, refetch: refetchWishlist } = useWishlist();
   const { data: reviewsData, isLoading: reviewsLoading, error: reviewsError } = useMyReviews();
   
   const removeFromWishlist = useRemoveFromWishlist();
@@ -18,6 +20,9 @@ function Profile() {
 
   const wishlist = wishlistData?.wishlist || [];
   const reviews = reviewsData?.reviews || [];
+  
+  // Count how many wishlist items are missing details
+  const missingDetailsCount = wishlist.filter((item: any) => !item.restaurant).length;
 
   const handleRemoveFromWishlist = async (yelpId: string, restaurantName: string) => {
     if (confirm(`Remove ${restaurantName} from your wishlist?`)) {
@@ -28,6 +33,22 @@ function Profile() {
   const handleDeleteReview = async (reviewId: number, restaurantName: string) => {
     if (confirm(`Delete your review for ${restaurantName}?`)) {
       await deleteReview.mutateAsync(reviewId);
+    }
+  };
+  
+  const handleRefreshDetails = async () => {
+    setIsRefreshing(true);
+    try {
+      const response = await api.post('/wishlist/refresh-details');
+      console.log('Refresh result:', response.data);
+      alert(`Successfully refreshed ${response.data.updated} restaurant details!`);
+      // Refetch wishlist to show updated data
+      await refetchWishlist();
+    } catch (error: any) {
+      console.error('Failed to refresh details:', error);
+      alert(`Failed to refresh details: ${error.response?.data?.detail || error.message}`);
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -93,6 +114,29 @@ function Profile() {
             <div>
               {wishlistError && (
                 <ErrorBanner message="Failed to load wishlist. Please try again." />
+              )}
+              
+              {/* Refresh Details Button - show if there are missing details */}
+              {missingDetailsCount > 0 && !wishlistLoading && (
+                <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-yellow-800">
+                        {missingDetailsCount} restaurant{missingDetailsCount > 1 ? 's' : ''} missing details
+                      </p>
+                      <p className="text-xs text-yellow-700 mt-1">
+                        Click refresh to fetch missing restaurant information from Yelp
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleRefreshDetails}
+                      disabled={isRefreshing}
+                      className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                    >
+                      {isRefreshing ? 'Refreshing...' : '🔄 Refresh Details'}
+                    </button>
+                  </div>
+                </div>
               )}
 
               {wishlistLoading ? (

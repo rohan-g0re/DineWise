@@ -25,7 +25,12 @@ class Settings(BaseSettings):
     frontend_url: str = "http://localhost:5173"
     
     # CORS Origins (allowed frontend URLs)
-    cors_origins: List[str] = ["http://localhost:5173", "http://localhost:3000"]
+    cors_origins: List[str] = [
+        "http://localhost:5173", 
+        "http://localhost:5174", 
+        "http://localhost:5175",
+        "http://localhost:3000"
+    ]
     
     # Security
     jwt_audience: Optional[str] = None

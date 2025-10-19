@@ -222,33 +222,54 @@ class YelpClient:
         Returns:
             Clean RestaurantSummary object
         """
-        # Extract categories (Yelp returns [{"alias": "pizza", "title": "Pizza"}])
-        categories = [cat["title"] for cat in yelp_data.get("categories", [])]
-        
-        # Extract address (Yelp returns nested location object)
-        location = yelp_data.get("location", {})
-        address_parts = [
-            location.get("address1"),
-            location.get("city"),
-            location.get("state")
-        ]
-        address = ", ".join(filter(None, address_parts)) if any(address_parts) else None
-        
-        return RestaurantSummary(
-            id=yelp_data["id"],
-            name=yelp_data["name"],
-            rating=yelp_data["rating"],
-            price=yelp_data.get("price"),
-            categories=categories,
-            image_url=yelp_data.get("image_url"),
-            distance=yelp_data.get("distance"),
-            is_open=not yelp_data.get("is_closed", True),
-            review_count=yelp_data.get("review_count", 0),
-            address=address,
-            phone=yelp_data.get("display_phone"),
-            yelp_url=yelp_data.get("url"),
-            coordinates=yelp_data.get("coordinates")
-        )
+        try:
+            # Extract categories (Yelp returns [{"alias": "pizza", "title": "Pizza"}])
+            categories = [cat.get("title", "") for cat in yelp_data.get("categories", [])]
+            categories = [c for c in categories if c]  # Filter empty strings
+            
+            # Extract address (Yelp returns nested location object)
+            location = yelp_data.get("location", {})
+            address_parts = [
+                location.get("address1"),
+                location.get("city"),
+                location.get("state")
+            ]
+            address = ", ".join(filter(None, address_parts)) if any(address_parts) else None
+            
+            # Get coordinates safely
+            coords = yelp_data.get("coordinates")
+            if coords and isinstance(coords, dict):
+                # Ensure it has latitude and longitude
+                if "latitude" in coords and "longitude" in coords:
+                    coordinates = coords
+                else:
+                    coordinates = None
+            else:
+                coordinates = None
+            
+            # Get rating and clamp it to valid range (1.0 - 5.0)
+            rating = float(yelp_data.get("rating", 1.0))
+            rating = max(1.0, min(5.0, rating))  # Clamp between 1.0 and 5.0
+            
+            return RestaurantSummary(
+                id=yelp_data.get("id", ""),
+                name=yelp_data.get("name", "Unknown Restaurant"),
+                rating=rating,
+                price=yelp_data.get("price"),
+                categories=categories,
+                image_url=yelp_data.get("image_url"),
+                distance=yelp_data.get("distance"),
+                is_open=not yelp_data.get("is_closed", False),
+                review_count=int(yelp_data.get("review_count", 0)),
+                address=address,
+                phone=yelp_data.get("display_phone"),
+                yelp_url=yelp_data.get("url"),
+                coordinates=coordinates
+            )
+        except Exception as e:
+            print(f"Error transforming business data: {e}")
+            print(f"Business data: {yelp_data}")
+            raise
     
     def _transform_business_to_detail(self, yelp_data: Dict[str, Any]) -> RestaurantDetail:
         """

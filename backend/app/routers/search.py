@@ -87,6 +87,9 @@ async def search_restaurants(
             )
             search_method = "yelp_api"
             
+            # 🔥 CACHE THE SEARCH RESULTS so details page can use them!
+            _cache_search_results(db, results, location)
+            
         except YelpAPIError as e:
             raise HTTPException(
                 status_code=429 if "rate limit" in str(e).lower() else 400,
@@ -208,3 +211,74 @@ async def test_search_endpoints():
             "/search?cuisine=italian&price=$,$$&location=BK"
         ]
     }
+
+
+def _cache_search_results(db: Session, results: List[RestaurantSummary], location: str):
+    """
+    Cache search results in the database so they can be used by the details page.
+    This is the KEY fix - now when Yelp's details API fails, we have cached data!
+    """
+    try:
+        from datetime import datetime, timezone
+        
+        for restaurant in results:
+            # Check if this restaurant already exists in cache
+            existing = db.exec(
+                select(RestaurantCache).where(RestaurantCache.yelp_id == restaurant.id)
+            ).first()
+            
+            if existing:
+                # Update existing cache with latest data
+                existing.name = restaurant.name
+                existing.rating = restaurant.rating
+                existing.price = restaurant.price
+                existing.categories = restaurant.categories
+                existing.review_count = restaurant.review_count
+                existing.address = restaurant.address
+                existing.phone = restaurant.phone
+                existing.updated_at = datetime.now(timezone.utc)
+                
+                # Update coordinates if available
+                if restaurant.coordinates:
+                    existing.lat = restaurant.coordinates.get("latitude")
+                    existing.lng = restaurant.coordinates.get("longitude")
+            else:
+                # Create new cache entry
+                # Determine location code (try to match NYC boroughs or use the location string)
+                location_code = location.upper()
+                if location_code not in NYC_BOROUGHS:
+                    # For non-NYC locations, use the first word as location code
+                    location_code = location.split(",")[0].strip().upper()[:10]
+                
+                # Get coordinates
+                lat = None
+                lng = None
+                if restaurant.coordinates:
+                    lat = restaurant.coordinates.get("latitude")
+                    lng = restaurant.coordinates.get("longitude")
+                
+                new_cache = RestaurantCache(
+                    yelp_id=restaurant.id,
+                    name=restaurant.name,
+                    rating=restaurant.rating,
+                    price=restaurant.price,
+                    categories=restaurant.categories,
+                    review_count=restaurant.review_count,
+                    address=restaurant.address,
+                    phone=restaurant.phone,
+                    lat=lat,
+                    lng=lng,
+                    location_code=location_code,
+                    created_at=datetime.now(timezone.utc),
+                    updated_at=datetime.now(timezone.utc)
+                )
+                db.add(new_cache)
+        
+        # Commit all changes
+        db.commit()
+        print(f"✅ Cached {len(results)} restaurants from search results")
+        
+    except Exception as e:
+        print(f"⚠️ Error caching search results: {e}")
+        db.rollback()
+        # Don't raise - caching failure shouldn't break search

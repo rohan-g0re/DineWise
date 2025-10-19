@@ -2,8 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.routers import health, auth # Add auth import
-from app.routers import search
+from app.routers import health, auth, search, restaurants, wishlist, reviews, flags
 
 
 # Create FastAPI application
@@ -25,8 +24,12 @@ app.add_middleware(
 
 # Include routers
 app.include_router(health.router)
-app.include_router(auth.router)  # Add auth router
+app.include_router(auth.router)
 app.include_router(search.router, prefix="/search", tags=["search"])
+app.include_router(restaurants.router, tags=["restaurants"])
+app.include_router(wishlist.router, tags=["wishlist"])
+app.include_router(reviews.router, tags=["reviews"])
+app.include_router(flags.router, tags=["flags"])
 
 
 

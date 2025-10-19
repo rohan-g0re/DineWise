@@ -146,15 +146,15 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE O
 
 * [x] **6.9 Unit tests**: mock DB & mock Yelp; verify param parsing and mapping.
 
-* [ ] **6.10 Create `app/routers/restaurants.py`** with `GET /restaurants/{yelp_id}`.
+* [x] **6.10 Create `app/routers/restaurants.py`** with `GET /restaurants/{yelp_id}`.
 
-* [ ] **6.11 Cache check**: quick read from `RestaurantCache` by `yelp_id`.
+* [x] **6.11 Cache check**: quick read from `RestaurantCache` by `yelp_id`.
 
-* [ ] **6.12 Yelp enrich**: call `get_business(yelp_id)`; merge phone, hours, photos, url.
+* [x] **6.12 Yelp enrich**: call `get_business(yelp_id)`; merge phone, hours, photos, url.
 
-* [ ] **6.13 (Optional) Yelp reviews**: call and cap to 3.
+* [x] **6.13 (Optional) Yelp reviews**: call and cap to 3.
 
-* [ ] **6.14 Response mapper**: return `RestaurantDetail`.
+* [x] **6.14 Response mapper**: return `RestaurantDetail`.
 
 * [ ] **6.15 Tests**: fixture for a cached business; fixture for Yelp detail; ensure merge works.
 
@@ -162,25 +162,25 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE O
 
 ## 7) Backend: Wishlist & Reviews Routers (Auth‑gated)
 
-* [ ] **7.1 Create `app/routers/wishlist.py`**: requires `get_current_user`.
-* [ ] **7.2 `POST /wishlist`** body: `{yelp_id}` → upsert record for user; return status.
-* [ ] **7.3 `GET /wishlist`** → list by user; join with `RestaurantCache` if present (else return minimal with `yelp_id`).
-* [ ] **7.4 `DELETE /wishlist/{yelp_id}`** → delete if owned by user.
-* [ ] **7.5 Create `app/routers/reviews.py`**: requires `get_current_user`.
-* [ ] **7.6 `POST /reviews`** body: `{yelp_id, rating (1‑5), text (≤ 1,000 chars)}` → insert.
-* [ ] **7.7 `GET /reviews?yelp_id=`** → list reviews (our DB) for a business.
-* [ ] **7.8 `GET /users/me/reviews`** → list reviews authored by current user.
-* [ ] **7.9 Add validation**: rating bounds, text length; normalize newline handling.
+* [x] **7.1 Create `app/routers/wishlist.py`**: requires `get_current_user`.
+* [x] **7.2 `POST /wishlist`** body: `{yelp_id}` → upsert record for user; return status.
+* [x] **7.3 `GET /wishlist`** → list by user; join with `RestaurantCache` if present (else return minimal with `yelp_id`).
+* [x] **7.4 `DELETE /wishlist/{yelp_id}`** → delete if owned by user.
+* [x] **7.5 Create `app/routers/reviews.py`**: requires `get_current_user`.
+* [x] **7.6 `POST /reviews`** body: `{yelp_id, rating (1‑5), text (≤ 1,000 chars)}` → insert.
+* [x] **7.7 `GET /reviews?yelp_id=`** → list reviews (our DB) for a business.
+* [x] **7.8 `GET /users/me/reviews`** → list reviews authored by current user.
+* [x] **7.9 Add validation**: rating bounds, text length; normalize newline handling.
 
 ---
 
 ## 8) Backend: User Flags for Events/Visits (Future‑proof)
 
-* [ ] **8.1 Create `app/routers/flags.py`** (auth‑gated).
-* [ ] **8.2 `PUT /flags/{yelp_id}`** body: `{visited?: bool, promo_opt_in?: bool}` → upsert `UserRestaurantFlags` row.
-* [ ] **8.3 `GET /flags`** → list all flags for the user.
-* [ ] **8.4 Add indexes** on `(user_id, yelp_id)`.
-* [ ] **8.5 Update `/docs/data_model.md`** with use cases (notifications later).
+* [x] **8.1 Create `app/routers/flags.py`** (auth‑gated).
+* [x] **8.2 `PUT /flags/{yelp_id}`** body: `{visited?: bool, promo_opt_in?: bool}` → upsert `UserRestaurantFlags` row.
+* [x] **8.3 `GET /flags`** → list all flags for the user.
+* [x] **8.4 Add indexes** on `(user_id, yelp_id)`.
+* [x] **8.5 Update `/docs/data_model.md`** with use cases (notifications later).
 
 ---
 
@@ -203,22 +203,22 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE O
 
 ## 10) Frontend: Firebase Auth (Email/Password)
 
-* [ ] **10.1 `npm i firebase`**; create `src/lib/firebase.ts` with config from Firebase console.
-* [ ] **10.2 Implement `auth.ts` helpers**: `signUp(email, pwd, fullName)`, `signIn(email, pwd)`, `signOut()`, `getIdToken()`.
-* [ ] **10.3 Create `AuthContext`** to hold current user and idToken (auto refresh on change).
-* [ ] **10.4 Build `/login` page** with tabs: Login / Signup.
-* [ ] **10.5 On success**: store idToken in memory; (optionally) cache in localStorage for reload.
-* [ ] **10.6 Add `ProtectedRoute`** wrapper that checks user; redirect to `/login` if missing.
-* [ ] **10.7 Add header buttons**: show “Login” if no user; show email + “Logout” if authed.
+* [x] **10.1 `npm i firebase`**; create `src/lib/firebase.ts` with config from Firebase console.
+* [x] **10.2 Implement `auth.ts` helpers**: `signUp(email, pwd, fullName)`, `signIn(email, pwd)`, `signOut()`, `getIdToken()`.
+* [x] **10.3 Create `AuthContext`** to hold current user and idToken (auto refresh on change).
+* [x] **10.4 Build `/login` page** with tabs: Login / Signup.
+* [x] **10.5 On success**: store idToken in memory; (optionally) cache in localStorage for reload.
+* [x] **10.6 Add `ProtectedRoute`** wrapper that checks user; redirect to `/login` if missing.
+* [x] **10.7 Add header buttons**: show "Login" if no user; show email + "Logout" if authed.
 
 ---
 
 ## 11) Frontend: API Client & Query Layer
 
-* [ ] **11.1 `npm i @tanstack/react-query axios`**; create `src/lib/api.ts` axios with baseURL from `VITE_API_BASE_URL`.
-* [ ] **11.2 Add axios interceptor** to inject `Authorization: Bearer <idToken>` when present.
-* [ ] **11.3 Wrap app** in `<QueryClientProvider>`; add React Query Devtools in dev.
-* [ ] **11.4 Create hooks**:
+* [x] **11.1 `npm i @tanstack/react-query axios`**; create `src/lib/api.ts` axios with baseURL from `VITE_API_BASE_URL`.
+* [x] **11.2 Add axios interceptor** to inject `Authorization: Bearer <idToken>` when present.
+* [x] **11.3 Wrap app** in `<QueryClientProvider>`; add React Query Devtools in dev.
+* [x] **11.4 Create hooks**:
 
   * `useSearch(params)` → calls `/api/search`.
   * `useRestaurant(id)` → calls `/api/restaurants/:id`.
@@ -230,75 +230,75 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE O
 
 ## 12) Frontend: Home (Search & Browse) — micro tasks
 
-* [ ] **12.1 Add Location control (dropdown)**: MAN/BK/QN/BX/SI + `Custom…` option.
-* [ ] **12.2 Add Custom Location input**: show text box only if `Custom…` picked.
-* [ ] **12.3 Add Query (text input)** with placeholder "pizza, ramen...".
-* [ ] **12.4 Add Cuisine (text input)** (optional).
-* [ ] **12.5 Add Price (checkboxes)**: $, $$, $$$, $$$$.
-* [ ] **12.6 Add Min Rating (range 1–5)** with numeric display.
-* [ ] **12.7 Build `useSearchParams` hook** to sync form ↔ URL.
-* [ ] **12.8 Wire `useSearch` query**: call `/api/search` with params from URL.
-* [ ] **12.9 Show loading skeleton cards** (6 placeholders).
-* [ ] **12.10 Show error banner** using standardized `detail`.
-* [ ] **12.11 Render responsive card grid** (1–2 mobile, 3–5 desktop).
-* [ ] **12.12 Card fields**: name, rating, price, categories snippet.
-* [ ] **12.13 Card buttons**: “View” (link to `/r/:id`), “Wishlist”.
-* [ ] **12.14 Guard Wishlist click**: if not authed, open login prompt.
-* [ ] **12.15 Empty state**: “No results” with hint to adjust filters.
+* [x] **12.1 Add Location control (dropdown)**: MAN/BK/QN/BX/SI + `Custom…` option.
+* [x] **12.2 Add Custom Location input**: show text box only if `Custom…` picked.
+* [x] **12.3 Add Query (text input)** with placeholder "pizza, ramen...".
+* [x] **12.4 Add Cuisine (text input)** (optional).
+* [x] **12.5 Add Price (checkboxes)**: $, $$, $$$, $$$$.
+* [x] **12.6 Add Min Rating (range 1–5)** with numeric display.
+* [x] **12.7 Build `useSearchParams` hook** to sync form ↔ URL.
+* [x] **12.8 Wire `useSearch` query**: call `/api/search` with params from URL.
+* [x] **12.9 Show loading skeleton cards** (6 placeholders).
+* [x] **12.10 Show error banner** using standardized `detail`.
+* [x] **12.11 Render responsive card grid** (1–2 mobile, 3–5 desktop).
+* [x] **12.12 Card fields**: name, rating, price, categories snippet.
+* [x] **12.13 Card buttons**: "View" (link to `/r/:id`), "Wishlist".
+* [x] **12.14 Guard Wishlist click**: if not authed, open login prompt.
+* [x] **12.15 Empty state**: "No results" with hint to adjust filters.
 
 ---
 
 ## 13) Frontend: Restaurant Details Page — micro tasks
 
-* [ ] **13.1 Route setup**: read `yelp_id` from URL params.
-* [ ] **13.2 Data fetch**: `useRestaurant(yelp_id)`; show skeleton while loading.
-* [ ] **13.3 Header block**: name, rating, price, categories.
-* [ ] **13.4 Contact block**: phone (click‑to‑copy), address (copy), hours (if present).
-* [ ] **13.5 Photo strip**: small gallery from Yelp detail.
-* [ ] **13.6 Yelp link button**: open new tab; aria‑label clearly states leaving site.
-* [ ] **13.7 Wishlist button**: optimistic toggle; revert on error.
-* [ ] **13.8 Reviews (Yelp)**: show up to 3 with “Powered by Yelp”.
-* [ ] **13.9 Reviews (Community)**: list our DB reviews.
-* [ ] **13.10 Review form** (authed): rating select + textarea + submit.
-* [ ] **13.11 After submit**: optimistic append; clear form; toast success.
-* [ ] **13.12 Empty states** for both review sections.
+* [x] **13.1 Route setup**: read `yelp_id` from URL params.
+* [x] **13.2 Data fetch**: `useRestaurant(yelp_id)`; show skeleton while loading.
+* [x] **13.3 Header block**: name, rating, price, categories.
+* [x] **13.4 Contact block**: phone (click‑to‑copy), address (copy), hours (if present).
+* [x] **13.5 Photo strip**: small gallery from Yelp detail.
+* [x] **13.6 Yelp link button**: open new tab; aria‑label clearly states leaving site.
+* [x] **13.7 Wishlist button**: optimistic toggle; revert on error.
+* [x] **13.8 Reviews (Yelp)**: show up to 3 with "Powered by Yelp".
+* [x] **13.9 Reviews (Community)**: list our DB reviews.
+* [x] **13.10 Review form** (authed): rating select + textarea + submit.
+* [x] **13.11 After submit**: optimistic append; clear form; toast success.
+* [x] **13.12 Empty states** for both review sections.
 
 ---
 
 ## 14) Frontend: Store Locator (Map + Browse Nearby) — micro tasks
 
-* [ ] **14.1 Install map libs**: `npm i leaflet react-leaflet`; import Leaflet CSS.
-* [ ] **14.2 Map container**: full‑width, fixed height (e.g., 60vh).
-* [ ] **14.3 Geolocate user**: `navigator.geolocation.getCurrentPosition` with error fallback to NYC center.
-* [ ] **14.4 Backend `/api/nearby` call** with lat/lng from geolocation.
-* [ ] **14.5 NYC bbox branch**: DB nearest; else Yelp nearby.
-* [ ] **14.6 Render markers**: business markers + “you are here” marker.
-* [ ] **14.7 Marker popup**: name, rating, link to details, wishlist button.
-* [ ] **14.8 “Browse Nearby” button**: navigate to `/` with lat/lng set as filters.
-* [ ] **14.9 Loading + error UIs** on the map panel.
+* [x] **14.1 Install map libs**: `npm i leaflet react-leaflet`; import Leaflet CSS.
+* [x] **14.2 Map container**: full‑width, fixed height (e.g., 60vh).
+* [x] **14.3 Geolocate user**: `navigator.geolocation.getCurrentPosition` with error fallback to NYC center.
+* [x] **14.4 Backend `/api/nearby` call** with lat/lng from geolocation.
+* [x] **14.5 NYC bbox branch**: DB nearest; else Yelp nearby.
+* [x] **14.6 Render markers**: business markers + "you are here" marker.
+* [x] **14.7 Marker popup**: name, rating, link to details, wishlist button.
+* [x] **14.8 "Browse Nearby" button**: navigate to `/` with lat/lng set as filters.
+* [x] **14.9 Loading + error UIs** on the map panel.
 
 ---
 
 ## 15) Frontend: Me (Wishlist & My Reviews) — micro tasks
 
-* [ ] **15.1 Route guard**: redirect to `/login` if no user.
-* [ ] **15.2 Load wishlist**: `useMyWishlist()`; show skeleton cards.
-* [ ] **15.3 Wishlist UI**: list cards with remove button (optimistic remove).
-* [ ] **15.4 Load my reviews**: `GET /users/me/reviews` via hook.
-* [ ] **15.5 Reviews table**: columns: date, name (from cache if available), rating, excerpt.
-* [ ] **15.6 Flags panel**: per wishlist item — checkboxes for `Visited` and `Promo updates`.
-* [ ] **15.7 Save flags**: call `/flags` upsert; toast on success.
-* [ ] **15.8 Empty states** for both lists.
+* [x] **15.1 Route guard**: redirect to `/login` if no user.
+* [x] **15.2 Load wishlist**: `useMyWishlist()`; show skeleton cards.
+* [x] **15.3 Wishlist UI**: list cards with remove button (optimistic remove).
+* [x] **15.4 Load my reviews**: `GET /users/me/reviews` via hook.
+* [x] **15.5 Reviews table**: columns: date, name (from cache if available), rating, excerpt.
+* [x] **15.6 Flags panel**: per wishlist item — checkboxes for `Visited` and `Promo updates`.
+* [x] **15.7 Save flags**: call `/flags` upsert; toast on success.
+* [x] **15.8 Empty states** for both lists.
 
 ---
 
 ## 16) Error Handling, States, and Guardrails
 
-* [ ] **16.1 Standardize backend errors** to `{detail, code}`.
-* [ ] **16.2 Frontend `extractApiError(e)`** util to read detail/code and show toasts.
-* [ ] **16.3 Unauthed actions** show gentle prompt to login; preserve action intent if possible.
-* [ ] **16.4 “Rate limit” UX**: if backend surfaces Yelp 429 → show banner suggesting narrower filters.
-* [ ] **16.5 404 Page** with “Back to Home” button.
+* [x] **16.1 Standardize backend errors** to `{detail, code}`.
+* [x] **16.2 Frontend `extractApiError(e)`** util to read detail/code and show toasts.
+* [x] **16.3 Unauthed actions** show gentle prompt to login; preserve action intent if possible.
+* [x] **16.4 "Rate limit" UX**: if backend surfaces Yelp 429 → show banner suggesting narrower filters.
+* [ ] **16.5 404 Page** with "Back to Home" button.
 * [ ] **16.6 Global Error Boundary** to catch render errors.
 
 ---
@@ -318,7 +318,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE O
 * [ ] **18.1 Scripts**: FE—`dev`, `build`, `test`; BE—`dev` (uvicorn), `test` (pytest), `seed` (boroughs), `fmt` (black/isort).
 * [ ] **18.2 Prettier & ESLint** for FE; Black & isort for BE; add config files.
 * [ ] **18.3 Concurrent dev**: run FE on 5173 and BE on 8000; document CORS origins.
-* [ ] **18.4 Example `.env.local` files** for both apps; never commit real keys.
+* [x] **18.4 Example `.env.local` files** for both apps; never commit real keys.
 
 ---
 
@@ -353,11 +353,11 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE O
 
 ## Acceptance Criteria Summary (MVP)
 
-* [ ] Can **sign up / log in** with Firebase (email/password) and call **/auth/me**.
-* [ ] Can **search** with borough locations via DB and **other locations** via Yelp.
-* [ ] Can open a **restaurant detail** page with Yelp link and show Yelp+community reviews.
-* [ ] Can **add/remove wishlist** from cards, details, and locator popups.
-* [ ] Can **post a review** (authed), and it appears immediately.
-* [ ] Can use the **locator** to see nearby restaurants and click through to details.
-* [ ] Can set **visited/promo** flags (DB only, for future notifications).
-* [ ] Midterm **demo** runs locally with seeded NYC data and at least one happy path end‑to‑end.
+* [x] Can **sign up / log in** with Firebase (email/password) and call **/auth/me**.
+* [x] Can **search** with borough locations via DB and **other locations** via Yelp.
+* [x] Can open a **restaurant detail** page with Yelp link and show Yelp+community reviews.
+* [x] Can **add/remove wishlist** from cards, details, and locator popups.
+* [x] Can **post a review** (authed), and it appears immediately.
+* [x] Can use the **locator** to see nearby restaurants and click through to details.
+* [x] Can set **visited/promo** flags (DB only, for future notifications).
+* [x] Midterm **demo** runs locally with seeded NYC data and at least one happy path end‑to‑end.

@@ -134,6 +134,38 @@ Restaurant Cache (1) ←→ (Many) User Restaurant Flags (by yelp_id)
 - Optimized for common search and filtering operations
 - Improved query performance by 10-100x for indexed columns
 
+## Current Implementation Status
+
+### Completed Features
+- ✅ **User Authentication**: Firebase integration with user management
+- ✅ **Restaurant Search**: Cached NYC borough data + live Yelp API integration
+- ✅ **Restaurant Details**: Full restaurant information with Yelp reviews
+- ✅ **Wishlist Management**: Add/remove restaurants from personal wishlist
+- ✅ **Community Reviews**: User-generated reviews with CRUD operations
+- ✅ **User Flags**: Visited status and promo preferences for future notifications
+- ✅ **Location-based Search**: Nearby restaurant search with geolocation
+- ✅ **Database Caching**: Restaurant data caching to reduce Yelp API calls
+
+### API Endpoints Implemented
+- **Authentication**: `/auth/me`, `/auth/test`
+- **Health**: `/health/`, `/health/detailed`
+- **Search**: `/search/search`, `/search/nearby`, `/search/test`
+- **Restaurants**: `/restaurants/{yelp_id}`, `/restaurants/{yelp_id}/reviews`
+- **Wishlist**: `/wishlist` (GET, POST), `/wishlist/{yelp_id}` (DELETE), `/wishlist/check/{yelp_id}`, `/wishlist/refresh-details`
+- **Reviews**: `/reviews` (GET, POST), `/reviews/{review_id}` (PATCH, DELETE), `/users/me/reviews`
+- **Flags**: `/flags` (GET), `/flags/{yelp_id}` (GET, PUT, DELETE)
+
+### Frontend Features
+- ✅ **React + TypeScript**: Modern frontend with type safety
+- ✅ **Firebase Authentication**: Email/password login and registration
+- ✅ **Restaurant Search**: Advanced filtering and search functionality
+- ✅ **Restaurant Details**: Comprehensive restaurant information display
+- ✅ **Wishlist Management**: Add/remove restaurants from wishlist
+- ✅ **Review System**: Create, read, update, delete reviews
+- ✅ **User Profile**: View personal reviews and wishlist
+- ✅ **Interactive Map**: Location-based restaurant discovery
+- ✅ **Responsive Design**: Mobile-friendly interface with Tailwind CSS
+
 ## Common Query Patterns
 
 ### Fast Borough Search:

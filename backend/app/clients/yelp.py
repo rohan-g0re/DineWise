@@ -299,8 +299,8 @@ class YelpClient:
         # Extract coordinates
         coordinates = yelp_data.get("coordinates", {})
         
-        # Extract business hours
-        hours = yelp_data.get("business_hours", [])
+        # Extract business hours (Yelp returns "hours" not "business_hours")
+        hours = yelp_data.get("hours", [])
         
         # Extract transactions (delivery, pickup, etc.)
         transactions = yelp_data.get("transactions", [])

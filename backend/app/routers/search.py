@@ -76,19 +76,28 @@ async def search_restaurants(
             if cuisine:
                 search_term = f"{search_term} {cuisine}"
             
-            # REUSE the existing function from yelp.py! 
+            # REUSE the existing function from yelp.py!
+            # NOTE: Yelp API does NOT support rating filtering
             results = await yelp_client.search_businesses_clean(
                 term=search_term,
                 location=location,
                 price=yelp_price,
-                rating=rating_min,
+                rating=None,  # Yelp API doesn't support rating parameter
                 limit=limit,
                 offset=offset
             )
-            search_method = "yelp_api"
             
-            # 🔥 CACHE THE SEARCH RESULTS so details page can use them!
-            _cache_search_results(db, results, location)
+            # Filter out businesses with no reviews (Yelp API rejects them)
+            results = [r for r in results if r.review_count > 0]
+            
+            # Apply rating filter manually (Yelp API doesn't support this)
+            if rating_min is not None:
+                results = [r for r in results if r.rating >= rating_min]
+            
+            # Cache search results for fallback when details API fails
+            _cache_search_results(db, results)
+            
+            search_method = "yelp_api"
             
         except YelpAPIError as e:
             raise HTTPException(
@@ -126,7 +135,8 @@ async def _search_cached_restaurants(
     
     # Start building the query
     sql_query = select(RestaurantCache).where(
-        RestaurantCache.location_code == location_code
+        RestaurantCache.location_code == location_code,
+        RestaurantCache.review_count > 0  # Filter out zero-review restaurants
     )
     
     # Add text search filter - Search in name and lowercase categories
@@ -193,7 +203,77 @@ async def _search_cached_restaurants(
     return results
     
 
-@router.get("/search/test")
+@router.get("/nearby")
+async def search_nearby_restaurants(
+    latitude: float = Query(..., description="User latitude coordinate"),
+    longitude: float = Query(..., description="User longitude coordinate"),
+    radius: int = Query(5000, ge=100, le=40000, description="Search radius in meters (max 40km)"),
+    limit: int = Query(20, ge=1, le=50, description="Number of results"),
+    db: Session = Depends(get_db)
+) -> dict:
+    """
+    Search for restaurants near a specific location with strict radius filtering.
+    This endpoint is specifically for the Store Locator feature.
+    
+    Unlike the general search endpoint, this enforces strict radius filtering
+    because Yelp API doesn't always respect the radius parameter.
+    """
+    try:
+        print(f"🔍 Nearby Search: lat={latitude}, lng={longitude}, radius={radius}m")
+        
+        # Call Yelp API with radius parameter
+        raw_result = await yelp_client.search_nearby(
+            latitude=latitude,
+            longitude=longitude,
+            radius=radius,
+            categories="restaurants",
+            limit=limit
+        )
+        
+        # Transform results
+        results = []
+        for business in raw_result.get("businesses", []):
+            results.append(yelp_client._transform_business_to_summary(business))
+        
+        # CRITICAL: Yelp API doesn't strictly enforce radius parameter
+        # It treats it more as a "suggestion", so we filter server-side
+        initial_count = len(results)
+        results = [r for r in results if r.distance is not None and r.distance <= radius]
+        filtered_count = initial_count - len(results)
+        
+        if filtered_count > 0:
+            print(f"⚠️ Filtered out {filtered_count} restaurants beyond {radius}m radius")
+        print(f"✅ Returning {len(results)} restaurants within {radius}m")
+        
+        # Filter out businesses with no reviews
+        results = [r for r in results if r.review_count > 0]
+        
+        # Cache for fallback
+        _cache_search_results(db, results)
+        
+        return {
+            "status": "success",
+            "method": "yelp_nearby_strict",
+            "total": len(results),
+            "radius_meters": radius,
+            "location": {
+                "latitude": latitude,
+                "longitude": longitude
+            },
+            "restaurants": results
+        }
+        
+    except YelpAPIError as e:
+        raise HTTPException(
+            status_code=429 if "rate limit" in str(e).lower() else 400,
+            detail={
+                "message": str(e),
+                "code": "YELP_API_ERROR"
+            }
+        )
+
+
+@router.get("/test")
 async def test_search_endpoints():
     """
     Test endpoint to verify search functionality.
@@ -202,33 +282,35 @@ async def test_search_endpoints():
         "message": "Search endpoints are working!",
         "available_endpoints": [
             "GET /search - Main search endpoint",
+            "GET /search/nearby - Nearby restaurants with strict radius filtering (for locator)",
             "GET /search/test - This test endpoint"
         ],
         "nyc_boroughs": list(NYC_BOROUGHS),
         "example_requests": [
             "/search?q=pizza&location=MAN&limit=5",
             "/search?q=ramen&location=Brooklyn, NY&rating_min=4.0",
-            "/search?cuisine=italian&price=$,$$&location=BK"
+            "/search?cuisine=italian&price=$,$$&location=BK",
+            "/search/nearby?latitude=40.7580&longitude=-73.9855&radius=1000"
         ]
     }
 
 
-def _cache_search_results(db: Session, results: List[RestaurantSummary], location: str):
+def _cache_search_results(db: Session, results: List[RestaurantSummary]):
     """
-    Cache search results in the database so they can be used by the details page.
-    This is the KEY fix - now when Yelp's details API fails, we have cached data!
+    Cache search results so they can be used as fallback when Yelp details API fails.
+    This helps handle Yelp's inconsistent API behavior.
     """
     try:
         from datetime import datetime, timezone
         
         for restaurant in results:
-            # Check if this restaurant already exists in cache
+            # Check if already exists
             existing = db.exec(
                 select(RestaurantCache).where(RestaurantCache.yelp_id == restaurant.id)
             ).first()
             
             if existing:
-                # Update existing cache with latest data
+                # Update existing cache
                 existing.name = restaurant.name
                 existing.rating = restaurant.rating
                 existing.price = restaurant.price
@@ -238,24 +320,13 @@ def _cache_search_results(db: Session, results: List[RestaurantSummary], locatio
                 existing.phone = restaurant.phone
                 existing.updated_at = datetime.now(timezone.utc)
                 
-                # Update coordinates if available
                 if restaurant.coordinates:
                     existing.lat = restaurant.coordinates.get("latitude")
                     existing.lng = restaurant.coordinates.get("longitude")
             else:
                 # Create new cache entry
-                # Determine location code (try to match NYC boroughs or use the location string)
-                location_code = location.upper()
-                if location_code not in NYC_BOROUGHS:
-                    # For non-NYC locations, use the first word as location code
-                    location_code = location.split(",")[0].strip().upper()[:10]
-                
-                # Get coordinates
-                lat = None
-                lng = None
-                if restaurant.coordinates:
-                    lat = restaurant.coordinates.get("latitude")
-                    lng = restaurant.coordinates.get("longitude")
+                lat = restaurant.coordinates.get("latitude") if restaurant.coordinates else None
+                lng = restaurant.coordinates.get("longitude") if restaurant.coordinates else None
                 
                 new_cache = RestaurantCache(
                     yelp_id=restaurant.id,
@@ -268,15 +339,13 @@ def _cache_search_results(db: Session, results: List[RestaurantSummary], locatio
                     phone=restaurant.phone,
                     lat=lat,
                     lng=lng,
-                    location_code=location_code,
+                    location_code="SEARCH",  # Mark as from search, not NYC borough
                     created_at=datetime.now(timezone.utc),
                     updated_at=datetime.now(timezone.utc)
                 )
                 db.add(new_cache)
         
-        # Commit all changes
         db.commit()
-        print(f"✅ Cached {len(results)} restaurants from search results")
         
     except Exception as e:
         print(f"⚠️ Error caching search results: {e}")

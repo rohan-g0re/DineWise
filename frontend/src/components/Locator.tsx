@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { Link } from 'react-router-dom';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { useSearchRestaurants } from '../lib/queries';
+import { useNearbyRestaurants } from '../lib/queries';
 import RestaurantCard from './RestaurantCard';
 import { RestaurantGridSkeleton } from './LoadingSkeleton';
 
@@ -46,18 +46,27 @@ function Locator() {
     }
   }, []);
 
-  // Search nearby restaurants
-  const { data, isLoading } = useSearchRestaurants(
+  // Search nearby restaurants using dedicated nearby endpoint
+  const { data, isLoading } = useNearbyRestaurants(
     userLocation
       ? {
           latitude: userLocation.lat,
           longitude: userLocation.lng,
+          radius: searchRadius,
           limit: 20,
         }
-      : { query: '', location: '' }
+      : { latitude: 0, longitude: 0, radius: 0 } // Disabled state
   );
 
   const restaurants = data?.restaurants || [];
+  
+  // Debug: Log search parameters when they change
+  useEffect(() => {
+    if (userLocation) {
+      console.log(`🔍 Locator Search: radius=${searchRadius}m (${(searchRadius / 1000).toFixed(1)}km), location=(${userLocation.lat}, ${userLocation.lng})`);
+      console.log(`📊 Results: ${restaurants.length} restaurants found`);
+    }
+  }, [searchRadius, userLocation, restaurants.length]);
 
   return (
     <div className="space-y-6">
@@ -111,7 +120,7 @@ function Locator() {
                   setMapCenter([latitude, longitude]);
                   setLocationError(null);
                 },
-                (error) => {
+                () => {
                   setLocationError('Unable to get your location. Please check your browser permissions.');
                 }
               );

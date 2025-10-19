@@ -21,39 +21,51 @@ async def get_restaurant_details(
     """
     Get detailed information about a restaurant.
     
-    This endpoint:
-    1. Checks cache for basic info
-    2. Fetches full details from Yelp API
-    3. Fetches up to 3 reviews from Yelp
-    4. Merges everything into a comprehensive response
+    Flow:
+    1. Try Yelp API for fresh details
+    2. If Yelp fails, check cache for basic info
+    3. Return whatever data we have
     """
     
-    # Step 1: Check if we have this restaurant in cache
+    # Check if we have cached data as fallback
     cached_restaurant = db.exec(
         select(RestaurantCache).where(RestaurantCache.yelp_id == yelp_id)
     ).first()
     
-    # Step 2: Fetch full details from Yelp API
     try:
-        # REUSE: get_business_clean() method that already exists
+        # Try to fetch full details from Yelp (includes hours, photos, etc.)
+        print(f"🔍 Fetching details for {yelp_id} from Yelp API...")
         restaurant_detail = await yelp_client.get_business_clean(yelp_id)
+        print(f"✅ Got details from Yelp for {yelp_id}")
         
-        # REUSE: get_reviews_clean() method that already exists
-        yelp_reviews = await yelp_client.get_reviews_clean(yelp_id)
+        # Fetch reviews from Yelp (up to 3) - handle failure gracefully
+        yelp_reviews = []
+        try:
+            yelp_reviews = await yelp_client.get_reviews_clean(yelp_id)
+            yelp_reviews = yelp_reviews[:3] if yelp_reviews else []
+            print(f"✅ Got {len(yelp_reviews)} reviews from Yelp")
+        except YelpAPIError as review_error:
+            print(f"⚠️ Reviews API failed for {yelp_id}: {str(review_error)}")
+            print(f"   Continuing with business details but no reviews")
+            # Continue anyway - we have business details
         
-        # Limit to 3 reviews as per task requirements
-        yelp_reviews = yelp_reviews[:3] if yelp_reviews else []
+        return {
+            "status": "success",
+            "source": "yelp_api",
+            "restaurant": restaurant_detail.model_dump(),
+            "yelp_reviews": [review.model_dump() for review in yelp_reviews]
+        }
         
     except YelpAPIError as e:
-        # Log the actual error for debugging
-        print(f"Yelp API Error for {yelp_id}: {str(e)}")
+        print(f"❌ Business Details API failed for {yelp_id}: {str(e)}")
+        print(f"   Error type: {type(e).__name__}")
         
-        # If Yelp fails but we have cache, return cached data
+        # Fallback to cached data if available (from search results)
         if cached_restaurant:
             return {
                 "status": "success",
-                "source": "cache_only",
-                "message": "Yelp API unavailable, showing cached data",
+                "source": "cache",
+                "message": "Showing basic info (full details unavailable from Yelp)",
                 "restaurant": {
                     "id": cached_restaurant.yelp_id,
                     "name": cached_restaurant.name,
@@ -76,25 +88,15 @@ async def get_restaurant_details(
                 },
                 "yelp_reviews": []
             }
-        else:
-            # No cache and Yelp failed - return error
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail={
-                    "message": f"Unable to fetch restaurant details. Yelp API error: {str(e)}",
-                    "code": "YELP_API_ERROR",
-                    "yelp_error": str(e)
-                }
-            )
-    
-    # Step 3: Return merged data
-    return {
-        "status": "success",
-        "source": "yelp_api",
-        "restaurant": restaurant_detail.model_dump(),
-        "yelp_reviews": [review.model_dump() for review in yelp_reviews],
-        "cached": cached_restaurant is not None
-    }
+        
+        # No cache and Yelp failed - return error
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "message": "Restaurant details unavailable. The business may have closed or moved.",
+                "code": "RESTAURANT_NOT_FOUND"
+            }
+        )
 
 
 @router.get("/restaurants/{yelp_id}/reviews")
